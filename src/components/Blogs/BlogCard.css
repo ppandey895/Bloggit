@@ -1,0 +1,17 @@
+.blog-text,
+.blog-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    line-height: 18px;    
+    max-height: 36px;     
+    -webkit-box-orient: vertical;
+}
+
+.blog-text {
+    -webkit-line-clamp: 2;
+}
+
+.blog-title {
+    -webkit-line-clamp: 1;
+}

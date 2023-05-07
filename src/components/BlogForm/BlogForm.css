@@ -1,0 +1,21 @@
+input[type='file'] {
+    position: absolute;
+    z-index: -1;
+    left: 2rem;
+    font-size: 0.8rem;
+    color: #b8b8b8;
+}
+
+::file-selector-button {
+	opacity: 0;
+}
+
+.info-icon {
+    cursor: pointer;
+    transition: fill 200ms ease-in;
+}
+
+.info-icon:hover {
+    fill: #555;
+    color: #3bffae;
+}

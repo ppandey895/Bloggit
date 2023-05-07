@@ -1,0 +1,20 @@
+.App {
+  overflow: hidden;
+}
+
+.head-text {
+  white-space: nowrap;
+  background: linear-gradient(to right, #fff, #bfbfbf, #fff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.heading {
+  color: #b6b5b5;
+}
+
+.o-menu {
+  position: relative;
+  color: #6FFFC2;
+}
