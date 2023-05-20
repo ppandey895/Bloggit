@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Form, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { auth } from '../../firebaseConfig';
 import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import {
@@ -12,6 +12,7 @@ import {
     InputLeftElement,
     InputRightElement,
     Divider,
+    FormControl
 } from '@chakra-ui/react';
 import { HiLockClosed, HiEye, HiEyeOff } from 'react-icons/hi';
 import { FaUserAstronaut } from 'react-icons/fa';
@@ -21,7 +22,7 @@ function SignIn() {
   const mailRef = useRef(null);
   const passRef = useRef(null);
 
-  const [hidePass, setHidePass] = useState(false);
+  const [hidePass, setHidePass] = useState(true);
   const [isError, setIsError] = useState(false);
 
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ function SignIn() {
 
   return (
     <Flex alignItems='center' justifyContent='center' flexDir='column' p='6'>
-        <Form style={{width: '75%'}}>
+        <FormControl width='75%'>
             <InputGroup>
                 <InputLeftElement mt='4' children={<FaUserAstronaut />} />
                 <Input
@@ -91,7 +92,7 @@ function SignIn() {
             <Button leftIcon={<FcGoogle />} _active={{bg: '#6FFFC2'}} onClick={GoogleSignIn}>
                 <Text>Sign In with Google</Text>    
             </Button>
-        </Form>
+        </FormControl>
     </Flex>
   )
 }

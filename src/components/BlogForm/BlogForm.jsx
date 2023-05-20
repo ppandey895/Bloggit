@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useRef, useState, useEffect } from "react";
+import { ref, set, update } from "firebase/database";
+import ReactQuill from "react-quill";
 import {
   Flex,
   Heading,
@@ -11,33 +12,126 @@ import {
   Checkbox,
   FormLabel,
   CheckboxGroup,
+  useToast,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogCloseButton,
+  useDisclosure
 } from "@chakra-ui/react";
 import { FaInfoCircle, FaPlus, FaRocket } from "react-icons/fa";
+import { AiFillAlert } from 'react-icons/ai';
 import { FcNook } from "react-icons/fc";
 import { useAuthState } from'react-firebase-hooks/auth';
 import FileBase from 'react-file-base64';
+import { db, auth } from "../../firebaseConfig";
+import { useNavigate, useParams } from "react-router";
+import { useAtom } from 'jotai';
+import { blogsAtom } from "../Blogs/BlogCards";
+import 'react-quill/dist/quill.snow.css';
 import "./BlogForm.css";
-import { auth } from "../../firebaseConfig";
 
 const BlogForm = function () {
-  const [blogInfo, setBlogInfo] = useState({
-    blogTitle: '',
-    blogContent: '',
-    blogThumb: '',
-    anon: false,
-  });
-  
-  const [user, loading ]= useAuthState(auth);
-  
-  const onSubmit = function() {
-    console.log(user);
-    if(user) {
+  const params = useParams();
+  const navigate = useNavigate();
 
+  // for storing the blog data from the inputs
+  const [blogInfo, setBlogInfo] = useState();
+  const [user, loading ] = useAuthState(auth);
+  const [thumb, setThumb] = useState('');
+
+  const { onOpen, isOpen, onClose } = useDisclosure();
+  const [errorMessage, setErrorMessage] = useState({});
+
+  const cancelRef = useRef();
+  const titleRef = useRef();
+  const contentRef = useRef();
+  const toast = useToast();
+
+  // fetches the existing blog data from jotai
+  const [blogs, setBlogs] = useAtom(blogsAtom);
+
+  const onSubmit = function() {
+    // post a blog only if a user is logged in
+    if(user) { 
+
+      // check if the blog title or content is empty
+      if(titleRef.current.value.length > 0 && contentRef.current.value.length > 0) {
+
+        // update the blog if the blog id is already known
+        if(params.blogId) {
+          const blogId = params.blogId;
+          const updates = {
+            ['/blogs/' + blogId]: {
+              blog_id: blogId,
+              blog_title: titleRef.current.value,
+              blog_content: contentRef.current.value,
+              blog_thumb: thumb.length !== 0 ? thumb : blogInfo.blog_thumb,
+              created_by: blogInfo.created_by,
+              email: blogInfo.email,        
+              created_at: blogInfo.created_at,
+              anon: blogInfo.anon,
+              upvotes: blogInfo.upvotes,
+            }
+          };
+          update(ref(db), updates);
+          toast({
+            title: 'Blog Updated.',
+            description: "Your blog was successfully updated.",
+            status: 'success',
+            duration: 9000,
+            isClosable: true,
+          });
+        } 
+        
+        // create a new blog if the blog id is not known
+        else {
+          const blogId = Math.random().toString(36).substring(2, 8);
+          const newBlog = {
+            blog_id: blogId,
+            blog_title: blogInfo.blog_title,
+            blog_content: contentRef.current.value,
+            blog_thumb: thumb,
+            created_by: user.displayName,
+            email: user.email,        
+            created_at: Date.now() / 1000,
+            anon: blogInfo.anon,
+            upvotes: 0,
+          };
+
+          set(ref(db, 'blogs/' + blogId), newBlog);
+          toast({
+            title: 'Blog Posted.',
+            description: "Your blog was successfully posted.",
+            status: 'success',
+            duration: 9000,
+            isClosable: true,
+          });
+        }
+
+        navigate('/explore');
+      }
+
+      else {
+        setErrorMessage('The blog must have a title and some content');
+        onOpen();
+      }
     }
     else {
-      alert('you need to sign in first');
+      setErrorMessage('You need to Sign In first.');
+      onOpen();
     }
   }
+
+  useEffect(() => {
+    if(params.blogId) {
+      const BLOG = blogs.filter(blog => blog.blog_id === params.blogId)[0];
+      setBlogInfo(BLOG);
+      if(titleRef.current.value.length === 0) titleRef.current.value = BLOG.blog_title;
+      if(contentRef.current.value.length === 0) contentRef.current.value = BLOG.blog_content;
+    }
+  })
 
   return (
     <Flex
@@ -86,7 +180,8 @@ const BlogForm = function () {
             borderColor="#6FFFC2"
             _focus={{ borderColor: "#6FFFC2" }}
             _hover={{ background: "white" }}
-            onChange={e => setBlogInfo({...blogInfo, blogTitle: e.target.value})}
+            onChange={e => setBlogInfo({...blogInfo, blog_title: e.target.value})}
+            ref={titleRef}
           />
         </InputGroup>
         <InputGroup my="2">
@@ -102,21 +197,16 @@ const BlogForm = function () {
           >
             Blog
           </Text>
-          <Textarea
+          <ReactQuill 
+            theme="snow" 
+            style={{width: '100%', outline: '2px solid #6FFFC2', border: 'none', borderRadius: '6px'}}
             id="blog-content"
-            type="text"
             placeholder="Start writing your blog here..."
-            variant="filled"
-            background="#fff"
-            borderColor="#6FFFC2"
-            _focus={{ borderColor: "#6FFFC2" }}
-            _hover={{ background: "white" }}
-            minHeight="100px"
-            onChange={e => setBlogInfo({...blogInfo, blogContent: e.target.value})}
+            ref={contentRef}
           />
         </InputGroup>
 
-        <InputGroup mt='2' mb='4'>
+        <InputGroup mt='10' mb='4'>
           <FaPlus style={{marginTop: '6px'}} color='#6fffc2' fontSize='0.8rem' />
           <Text cursor='pointer' fontSize='0.8rem' ml='2px' bg='#fff' p='1' color='#6fffc2' pointerEvents='none'>Add Thumbnail</Text>
           <FileBase 
@@ -125,7 +215,8 @@ const BlogForm = function () {
             accept=".jpeg, .png"
             multiple={false}
             onDone={({base64}) => {
-              setBlogInfo(blogInfo => ({...blogInfo, blogThumb: base64}))
+              setBlogInfo(blogInfo => ({...blogInfo, thumb: base64}))
+              setThumb(base64)
             }}
           />
         </InputGroup>
@@ -157,10 +248,33 @@ const BlogForm = function () {
             rightIcon={<FaRocket />}
             onClick={onSubmit}
           >
-            Post
+            {
+              params.blogId ? 'Update' : 'Post'
+            }
           </Button>
         </Flex>
       </Flex>
+
+      <AlertDialog
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+        isOpen={isOpen}
+        isCentered
+      >
+        <AlertDialogContent 
+          color='#444' 
+          display='flex' 
+          bg='red.100' 
+          alignItems='center'
+          borderColor='red.200' 
+          borderWidth='2px'
+          mx='10'
+        >
+          <AlertDialogHeader display='flex' flexDir='column' alignItems='center' fontSize='2rem'><AiFillAlert color='#f66'/>Oops!</AlertDialogHeader>
+          <AlertDialogCloseButton />
+          <AlertDialogBody>{ errorMessage }</AlertDialogBody>
+        </AlertDialogContent>
+      </AlertDialog>
     </Flex>
   );
 };

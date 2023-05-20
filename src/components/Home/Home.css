@@ -1,0 +1,59 @@
+.home {
+    background:
+    radial-gradient(circle at 100% 50%, transparent 20%, rgb(111, 255, 194, 0.1) 21%,
+    rgb(111, 255, 194, 0.1) 34%, transparent 35%, transparent),
+    radial-gradient(circle at 0% 50%, transparent 20%, rgb(111, 255, 194, 0.1) 21%, rgb(111, 255, 194, 0.1) 34%, transparent 35%, transparent) 0 -50px;
+    background-color: white;
+    background-size: 75px 100px;
+}
+
+.pointer {
+    scale: 0.8;
+    aspect-ratio: 1 / 1;
+    position: absolute;
+    left: calc(50% - 9rem);
+    top: 3.5rem;
+}
+
+.pointer path.tail {
+    stroke-dasharray: 0;
+    animation: arrow 10s ease-in infinite;
+}
+
+@keyframes arrow {
+    from { stroke-dasharray: 0; }
+    to { stroke-dasharray: 300px; }
+}
+
+.title {
+    position: relative;
+    cursor: pointer;
+    color: #6FFFC2;
+    transition: all 300s ease;
+}
+
+.title::before,
+.title::after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    aspect-ratio: 10 / 1;
+    background: transparent;
+    border-radius: 50vw;
+    top: 50%;
+    left: 50%;
+    transition: all 200ms ease-in-out;
+    opacity: 0;
+}
+
+.title:hover::before {
+    background: #6FFFC2;
+    transform: scale(2) rotate(30deg) translate(-30px, -10px);
+    opacity: 1;
+}
+
+.title:hover::after {
+    background: #6FFFC2;
+    transform: scale(2) rotate(-45deg) translate(20px, 40px);
+    opacity: 1;
+}

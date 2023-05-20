@@ -5,6 +5,7 @@ import {
     Heading
 } from '@chakra-ui/react';
 import './BlogCard.css';
+import { Link } from 'react-router-dom';
 
 
 function BlogCard({ blog }) {
@@ -12,15 +13,14 @@ function BlogCard({ blog }) {
 
   useEffect(() => {
     const date = new Date();
-
-    const timestamp = blog.created_at.seconds;
+    const timestamp = blog.created_at;
     const current = Math.floor(date.getTime() / 1000);
     const difference = current - timestamp;
 
     let output = ``;
     if (difference < 60) {
         // Less than a minute has passed:
-        output = `${difference} seconds ago`;
+        output = `${Math.floor(difference)} seconds ago`;
     } else if (difference < 3600) {
         // Less than an hour has passed:
         output = `${Math.floor(difference / 60)} minutes ago`;
@@ -38,17 +38,16 @@ function BlogCard({ blog }) {
         output = `${Math.floor(difference / 31449600)} years ago`;
     }
     
-    console.log(output);
     setCreatedAt(output);
   }, [blog]);
   return (
     <Flex boxShadow='lg' px='4' py='2' flexDir='column' mx='6' my='4' borderRadius='md' borderTopColor='#6FFFC2' borderTopWidth='4px'>
-        <Heading color='#606060' fontSize='lg' className="blog-title">{blog.blog_title}</Heading>
-        <Text className='blog-text' my='2' color='#707070' fontSize='sm'>{blog.blog_content}</Text>
+        <Heading color='#606060' fontSize='lg' className="blog-title"><Link to={`/blog/${blog.blog_id}`}>{blog.blog_title}</Link></Heading>
+        <Text className='blog-text' my='2' color='#707070' fontSize='sm' dangerouslySetInnerHTML={{ __html : blog.blog_content}}></Text>
         <Flex justifyContent='space-between' fontSize='0.8rem'>
             <Text>
               {
-                blog.anon ? '@anonymous' : `@${blog.created_by}`
+                blog.anon ? '@anonymous' : `@${blog.created_by?.toLowerCase()}`
               }
             </Text>
             <Text>{createdAt}</Text>

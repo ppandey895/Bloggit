@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { Form, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { auth } from '../../firebaseConfig';
-import { GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import {
     Flex,
     Text,
@@ -11,7 +11,9 @@ import {
     InputLeftElement,
     InputGroup,
     Divider,
+    useToast,
     InputRightElement,
+    FormControl
 } from '@chakra-ui/react';
 import { HiEye, HiEyeOff, HiLockClosed, HiLockOpen } from 'react-icons/hi';
 import { FaUserAstronaut, FaEllo } from 'react-icons/fa';
@@ -21,13 +23,25 @@ function SignUp() {
 	const nameRef = useRef(null);
   const mailRef = useRef(null);
   const passRef = useRef(null);
-  const [hidePass, setHidePass] = useState(false);
+  const [hidePass, setHidePass] = useState(true);
   const [isError, setIsError] = useState(false);
 	const [errorText, setErrorText] = useState('.');
   const googleProvider = new GoogleAuthProvider();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const toast = useToast();
+
+  const signUpSuccess = () => {
+    toast({
+      title: 'Account created.',
+      description: "We've created your account for you.",
+      status: 'success',
+      duration: 9000,
+      isClosable: true,
+    });
+  }
 
 	const handleSignUp = function() {
+    const displayName = nameRef.current.value;
     if(passRef.current.value.length < 8) {
 			setIsError(true);
 			setErrorText('password too short (min length 8)')
@@ -35,8 +49,13 @@ function SignUp() {
     else {
 			setIsError(false);
 			setErrorText('.');
-      const res = signInWithEmailAndPassword(auth, mailRef.current.value, passRef.current.value);
-      console.log(res);
+      createUserWithEmailAndPassword(auth, mailRef.current.value, passRef.current.value)
+      .then(({ user }) => {
+        updateProfile(user, { displayName });
+      })
+      .catch(error => console.log(error));
+
+      signUpSuccess();
       return navigate('/explore');
 		}
 	}
@@ -44,7 +63,8 @@ function SignUp() {
   const GoogleSignIn = async function() {
     try {
       const res = await signInWithPopup(auth, googleProvider);
-      console.log(res);
+      
+      signUpSuccess();
       return navigate('/explore');
 
     } catch (error) {
@@ -54,7 +74,7 @@ function SignUp() {
 
   return (
     <Flex alignItems='center' flexDir='column' p='6'>
-        <Form style={{width: '75%'}}>
+        <FormControl width='75%'>
             <InputGroup>
                 <InputLeftElement mt='4' children={<FaEllo />} />
                 <Input
@@ -107,7 +127,7 @@ function SignUp() {
             <Button leftIcon={<FcGoogle />} _active={{bg: '#6FFFC2'}} onClick={GoogleSignIn}>
                 <Text>Sign Up with Google</Text>    
             </Button>
-        </Form>
+        </FormControl>
     </Flex>
   )
 }

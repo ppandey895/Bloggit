@@ -18,7 +18,7 @@ import { FaUserAstronaut } from 'react-icons/fa';
 
 function UserControl({ user }) {
   return (
-    <Flex position='absolute' right='3vw' bottom='3vh'>
+    <Flex position='fixed' right='3vw' bottom='3vh'>
         <Menu>
             <MenuButton borderRadius='10vw' background='#bfb'>
             {

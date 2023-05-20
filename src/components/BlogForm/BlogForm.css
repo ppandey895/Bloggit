@@ -1,3 +1,14 @@
+div.ql-container {
+    border: none !important;
+    min-height: 100px;
+}
+
+div.ql-toolbar {
+    border: none !important;
+    border-bottom: 2px solid #6FFFC2 !important;
+
+}
+
 input[type='file'] {
     position: absolute;
     z-index: -1;

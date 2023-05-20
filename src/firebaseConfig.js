@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_PROJECT_KEY,
@@ -9,9 +9,10 @@ const firebaseConfig = {
   storageBucket: "bloggit-c8dd1.appspot.com",
   messagingSenderId: "406891211397",
   appId: "1:406891211397:web:4d8e4ec86f5bbf580997ec",
-  measurementId: "G-303B3QKN9P"
+  measurementId: "G-303B3QKN9P",
+  databaseURL: import.meta.env.VITE_FIREBASE_RTDB_URL
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+export const db = getDatabase(app);
 export const auth = getAuth(app);
