@@ -96,7 +96,7 @@ const BlogForm = function () {
             created_by: user.displayName,
             email: user.email,        
             created_at: Date.now() / 1000,
-            anon: blogInfo.anon,
+            anon: blogInfo.anon ? true : false,
             upvotes: 0,
           };
 

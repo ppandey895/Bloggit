@@ -1,0 +1,16 @@
+.about {
+    background:
+    radial-gradient(circle at 100% 50%, transparent 20%, rgb(111, 255, 194, 0.1) 21%,
+    rgb(111, 255, 194, 0.1) 34%, transparent 35%, transparent),
+    radial-gradient(circle at 0% 50%, transparent 20%, rgb(111, 255, 194, 0.1) 21%, rgb(111, 255, 194, 0.1) 34%, transparent 35%, transparent) 0 -50px;
+    background-color: white;
+    background-size: 75px 100px;
+    width: 100%;
+    min-height: 80vh;
+    padding: 2rem;
+}
+
+.highlight {
+    color: orangered;
+    font-weight: 600;
+}

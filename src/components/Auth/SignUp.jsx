@@ -15,7 +15,7 @@ import {
     InputRightElement,
     FormControl
 } from '@chakra-ui/react';
-import { HiEye, HiEyeOff, HiLockClosed, HiLockOpen } from 'react-icons/hi';
+import { HiEye, HiEyeOff, HiLockClosed } from 'react-icons/hi';
 import { FaUserAstronaut, FaEllo } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 

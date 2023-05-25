@@ -13,6 +13,7 @@ import BlogPage from './components/BlogPage/BlogPage';
 import Nav from './components/Nav/Nav';
 import './App.css';
 import Home from './components/Home/Home';
+import About from './components/About/About';
 
 // const router = createBrowserRouter([
 //   {
@@ -61,6 +62,7 @@ function App() {
         <Route path='/create/' element={ <BlogForm /> } />
         <Route path='/create/:blogId' element={ <BlogForm /> } />
         <Route path='/blog/:blogId' element={ <BlogPage /> } />
+        <Route path='/about' element={ <About /> } />
       </Routes>
 
       <UserControl user={user} />

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../../firebaseConfig';
-import { ref, set, getDatabase } from 'firebase/database';
+import { ref, set, update, getDatabase } from 'firebase/database';
 import {
     Flex,
     Heading,
@@ -30,13 +30,18 @@ import { blogsAtom } from '../Blogs/BlogCards';
 import { SlOptionsVertical } from 'react-icons/sl';
 import { BsFillPenFill } from 'react-icons/bs';
 import { MdDelete } from 'react-icons/md';
+import { RiHeart2Line, RiHeart2Fill } from 'react-icons/ri';
+import { motion } from 'framer-motion';
 
 function BlogPage() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const params = useParams();
+
   const [blogs, setBlogs] = useAtom(blogsAtom);
   const BLOG = blogs.filter(blog => blog.blog_id === params.blogId)[0];
+  // localStorage.setItem('blog', JSON.stringify(BLOG));
   const [createdAt, setCreatedAt] = useState();
+  const [liked, setLiked] = useState(false);
   const [ user ] = useAuthState(auth);
   const [ smallerThan768 ] = useMediaQuery('(max-width: 768px)');
   const [cat, setCat] = useState('');
@@ -46,7 +51,6 @@ function BlogPage() {
   const handleBlogDelete = async function() {
     const db = getDatabase();
     const blogRef = ref(db, 'blogs/' + BLOG.blog_id);
-    console.log(BLOG);
     const error = await set(blogRef, null);
     console.log(error);
 
@@ -66,6 +70,18 @@ function BlogPage() {
     return navigate('/create/' + BLOG.blog_id);
   }
   
+  const handleLike = function() {
+    if(user?.email !== BLOG.email) {
+      setLiked(!liked);
+      const db = getDatabase();
+      if(liked) {
+        update(ref(db,  'blogs/' + BLOG.blog_id), { ...BLOG, upvotes: BLOG.upvotes - 1});
+      } else {
+        update(ref(db,  'blogs/' + BLOG.blog_id), { ...BLOG, upvotes: BLOG.upvotes + 1});
+      }
+    }
+
+  }
   
   useEffect(() => {
     const loadCat = async() => {
@@ -104,7 +120,7 @@ function BlogPage() {
   }, []);
 
   return (
-    <Flex flexDir='column' my='10' maxW='768' boxShadow='lg' borderRadius='md' mx='8' bg='gray.100'>
+    <Flex as={motion.div} initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition='0.5s ease-in' flexDir='column' my='10' maxW='768' boxShadow='lg' borderRadius='md' mx='8' bg='gray.100'>
       {
         BLOG && (
         <>
@@ -148,6 +164,11 @@ function BlogPage() {
           </Flex>
         </Box>
         <Text dangerouslySetInnerHTML={{ __html : BLOG.blog_content}} px='6' py='4' color='gray.600' fontSize={smallerThan768 ? 'sm' : 'lg'}></Text>
+
+        <Flex px='6' py='4' alignItems='center' gap='2' onClick={handleLike} cursor='pointer' width='fit-content'>
+          { liked ? <RiHeart2Fill color='#f55' size='1.5rem' /> : <RiHeart2Line color='#444' size='1.5rem' /> }
+          { BLOG.upvotes }
+        </Flex>
         </>
         )
       }
