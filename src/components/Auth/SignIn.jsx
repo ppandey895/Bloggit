@@ -29,8 +29,6 @@ function SignIn() {
   const googleProvider = new GoogleAuthProvider();
 
 	const handleSignIn = function() {
-		console.log(mailRef.current.value);
-		console.log(passRef.current.value);
     if(passRef.current.value.length < 6) setIsError(true);
     else {
       setIsError(false);
