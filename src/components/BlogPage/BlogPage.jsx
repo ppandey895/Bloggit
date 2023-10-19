@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../../firebaseConfig';
-import { ref, set, update, getDatabase } from 'firebase/database';
+import { ref, set, update, getDatabase, onValue } from 'firebase/database';
 import {
     Flex,
     Heading,
@@ -22,7 +22,8 @@ import {
     ModalCloseButton,
     ModalBody,
     useMediaQuery,
-    useDisclosure
+    useDisclosure,
+    useClipboard,
 } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router';
 import './BlogPage.css';
@@ -31,15 +32,15 @@ import { SlOptionsVertical } from 'react-icons/sl';
 import { BsFillPenFill } from 'react-icons/bs';
 import { MdDelete } from 'react-icons/md';
 import { RiHeart2Line, RiHeart2Fill } from 'react-icons/ri';
+import { AiOutlineShareAlt } from 'react-icons/ai'; 
 import { motion } from 'framer-motion';
 
 function BlogPage() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const params = useParams();
-
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { onCopy, value, setValue, hasCopied } = useClipboard('https://justbloggit.netlify.app/#/blog/' + params.blogId);
   const [blogs, setBlogs] = useAtom(blogsAtom);
-  const BLOG = blogs.filter(blog => blog.blog_id === params.blogId)[0];
-  // localStorage.setItem('blog', JSON.stringify(BLOG));
+  const [BLOG, setBLOG] = useState(blogs.filter(blog => blog.blog_id === params.blogId)[0]);
   const [createdAt, setCreatedAt] = useState();
   const [liked, setLiked] = useState(false);
   const [ user ] = useAuthState(auth);
@@ -47,9 +48,9 @@ function BlogPage() {
   const [cat, setCat] = useState('');
   const navigate = useNavigate();
   const toast = useToast();
+  const db = getDatabase();
 
   const handleBlogDelete = async function() {
-    const db = getDatabase();
     const blogRef = ref(db, 'blogs/' + BLOG.blog_id);
     const error = await set(blogRef, null);
     console.log(error);
@@ -84,13 +85,25 @@ function BlogPage() {
   }
   
   useEffect(() => {
+    if(!BLOG) {
+      try {
+        const query = ref(db, 'blogs/' + params.blogId);
+        onValue(query, (snapshot) => {
+          const data = snapshot.val();
+          setBLOG(data);
+        });
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
+
     const loadCat = async() => {
       const res = await fetch('https://api.thecatapi.com/v1/images/search');
       const data = await res.json();
       setCat(data[0].url);
     }
     const date = new Date();
-    const timestamp = BLOG.created_at;
+    const timestamp = BLOG?.created_at || 600000;
     const current = Math.floor(date.getTime() / 1000);
     const difference = current - timestamp;
 
@@ -117,7 +130,7 @@ function BlogPage() {
     
     setCreatedAt(output);
     loadCat();
-  }, []);
+  }, [BLOG]);
 
   return (
     <Flex as={motion.div} initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition='0.5s ease-in' flexDir='column' my='10' maxW='768' boxShadow='lg' borderRadius='md' mx='8' bg='gray.100'>
@@ -165,9 +178,10 @@ function BlogPage() {
         </Box>
         <Text dangerouslySetInnerHTML={{ __html : BLOG.blog_content}} px='6' py='4' color='gray.600' fontSize={smallerThan768 ? 'sm' : 'lg'}></Text>
 
-        <Flex px='6' py='4' alignItems='center' gap='2' onClick={user && handleLike} cursor='pointer' width='fit-content'>
+        <Flex px='6' py='4' alignItems='center' gap='2' onClick={user && handleLike} cursor='pointer'>
           { liked ? <RiHeart2Fill color='#f55' size='1.5rem' /> : <RiHeart2Line color='#444' size='1.5rem' /> }
           { BLOG.upvotes }
+          <Button onClick={onCopy} marginLeft='auto' fontWeight='500'><AiOutlineShareAlt size='1.5rem' style={{marginRight: '0.5rem' }}/>{hasCopied ? "Copied!" : "Share"}</Button>
         </Flex>
         </>
         )

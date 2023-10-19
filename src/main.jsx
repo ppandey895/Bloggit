@@ -9,7 +9,6 @@ import { createStore, Provider } from 'jotai';
 const store = createStore();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
     <ChakraProvider>
       <Provider store={store}>
         <HashRouter>
@@ -17,5 +16,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         </HashRouter>
       </Provider>
     </ChakraProvider>
-  </React.StrictMode>,
 )

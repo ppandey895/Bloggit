@@ -15,42 +15,9 @@ import './App.css';
 import Home from './components/Home/Home';
 import About from './components/About/About';
 
-// const router = createBrowserRouter([
-//   {
-//     path: '/',
-//     element: <App />,
-//     children: [
-//       {
-//         path: 'explore',
-//         element: <BlogCards />,
-//       },
-//       {
-//         path: 'create',
-//         element: <BlogForm  />,
-//       },
-//       {
-//         path: 'create/:blogId',
-//         element: <BlogForm />,
-//       },
-//       {
-//         path: 'auth',
-//         element: <Auth />,        
-//       },
-//       {
-//         path: 'blog/:blogId',
-//         element: <BlogPage />,
-//       }
-//     ],
-//   },
-// ]);
-
-
 function App() {
   const [user, loading] = useAuthState(auth);
 
-  useEffect(() => {
-    console.log(user);
-  }, []);
   return (
     <Flex className="App" alignItems='center' justifyContent='center' flexDir='column' overflowX='hidden'>
       <Nav />
