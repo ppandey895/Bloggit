@@ -178,9 +178,11 @@ function BlogPage() {
         </Box>
         <Text dangerouslySetInnerHTML={{ __html : BLOG.blog_content}} px='6' py='4' color='gray.600' fontSize={smallerThan768 ? 'sm' : 'lg'}></Text>
 
-        <Flex px='6' py='4' alignItems='center' gap='2' onClick={user && handleLike} cursor='pointer'>
+        <Flex px='6' py='4' alignItems='center' gap='2' cursor='pointer'>
+          <Flex gap='2' onClick={user && handleLike}>
           { liked ? <RiHeart2Fill color='#f55' size='1.5rem' /> : <RiHeart2Line color='#444' size='1.5rem' /> }
           { BLOG.upvotes }
+          </Flex>
           <Button onClick={onCopy} marginLeft='auto' fontWeight='500'><AiOutlineShareAlt size='1.5rem' style={{marginRight: '0.5rem' }}/>{hasCopied ? "Copied!" : "Share"}</Button>
         </Flex>
         </>
